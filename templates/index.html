@@ -601,11 +601,11 @@
             usage_hours: parseInt(document.getElementById('hours').value)
         };
 
-        fetch('/api/v1/simulate', {
+        fetch('https://domestic-solar-battery-simulator.onrender.com/api/v1/simulate', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData)
-        })
+            })
         .then(function (response) {
             if (!response.ok) {
                 throw new Error("Simulation engine error");
