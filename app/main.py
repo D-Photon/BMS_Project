@@ -38,7 +38,7 @@ async def health_check():
 @app.get("/", response_class=HTMLResponse)
 async def serve_dashboard(request: Request):
     """Serves the main web dashboard."""
-    return templates.TemplateResponse("index.html", {"request": request})
+    return templates.TemplateResponse(request=request, name="index.html")
 
 @app.post("/api/v1/simulate", response_model=SimulationResponse)
 async def run_simulation(data: SimulationRequest):
