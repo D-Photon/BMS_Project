@@ -2,6 +2,7 @@ from pathlib import Path
 from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
+from fastapi.middleware.cors import CORSMiddleware
 from app.schemas import SimulationRequest, SimulationResponse
 from app.simulator import BMSSimulator
 
@@ -13,7 +14,26 @@ app = FastAPI(
     version="2.0.0"
 )
 
-templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
+# Enable CORS for cross-origin deployment (Cloudflare Pages + Render API)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Use public directory for web assets (Unified layout for Render & Cloudflare Pages)
+PUBLIC_DIR = BASE_DIR / "public"
+if not PUBLIC_DIR.exists():
+    PUBLIC_DIR = BASE_DIR / "templates"
+
+templates = Jinja2Templates(directory=str(PUBLIC_DIR))
+
+@app.get("/healthz")
+async def health_check():
+    """Health check endpoint for Render service monitoring."""
+    return {"status": "ok", "service": "bms-engine"}
 
 @app.get("/", response_class=HTMLResponse)
 async def serve_dashboard(request: Request):

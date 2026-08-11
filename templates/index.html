@@ -584,6 +584,14 @@
         else dodInput.value = 80;
     }
 
+    // Dynamic API Endpoint Resolution (Supports Render, Cloudflare Pages Proxy, and Localhost)
+    function getApiEndpoint() {
+        if (window.BMS_API_URL) {
+            return window.BMS_API_URL.replace(/\/$/, '') + '/api/v1/simulate';
+        }
+        return '/api/v1/simulate';
+    }
+
     document.getElementById('bmsForm').addEventListener('submit', function (e) {
         e.preventDefault();
 
@@ -601,7 +609,7 @@
             usage_hours: parseInt(document.getElementById('hours').value)
         };
 
-        fetch('https://domestic-solar-battery-simulator.onrender.com/api/v1/simulate', {
+        fetch(getApiEndpoint(), {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(requestData)
