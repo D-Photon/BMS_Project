@@ -67,6 +67,7 @@
             max-width: 1400px;
             margin: 0 auto;
             width: 100%;
+            min-width: 0;
             flex: 1;
         }
 
@@ -79,6 +80,9 @@
             border-bottom: 1px solid var(--panel-border);
             flex-wrap: wrap;
             gap: 12px;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
         }
 
         header h1 {
@@ -89,12 +93,14 @@
             background: linear-gradient(135deg, #ffffff 0%, #cbd5e1 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            word-break: break-word;
         }
 
         header p {
             margin: 0;
             color: var(--text-muted);
             font-size: 0.9rem;
+            word-break: break-word;
         }
 
         .header-badges {
@@ -102,6 +108,7 @@
             align-items: center;
             gap: 10px;
             flex-wrap: wrap;
+            max-width: 100%;
         }
 
         .brand-badge {
@@ -115,6 +122,7 @@
             display: flex;
             align-items: center;
             gap: 8px;
+            white-space: nowrap;
         }
 
         .engine-pill {
@@ -129,6 +137,7 @@
             align-items: center;
             gap: 6px;
             transition: all 0.3s ease;
+            white-space: nowrap;
         }
 
         /* Preset Quick Buttons - Scrollable on mobile */
@@ -138,6 +147,9 @@
             margin-bottom: 20px;
             flex-wrap: wrap;
             align-items: center;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
         }
 
         .preset-label {
@@ -161,6 +173,7 @@
             align-items: center;
             user-select: none;
             -webkit-user-select: none;
+            white-space: nowrap;
         }
 
         .btn-preset:hover, .btn-preset:active {
@@ -173,8 +186,11 @@
         /* Layout Grid */
         .layout-grid {
             display: grid;
-            grid-template-columns: 350px 1fr;
+            grid-template-columns: minmax(0, 350px) minmax(0, 1fr);
             gap: 24px;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
         }
 
         .panel {
@@ -185,6 +201,10 @@
             padding: 24px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
             border: 1px solid var(--panel-border);
+            min-width: 0;
+            max-width: 100%;
+            width: 100%;
+            box-sizing: border-box;
         }
 
         .panel h3 {
@@ -196,17 +216,30 @@
             display: flex;
             align-items: center;
             justify-content: space-between;
+            word-break: break-word;
         }
 
         /* Form Controls */
+        form {
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
+        }
+
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
         }
 
         .form-group {
             margin-bottom: 16px;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
         }
 
         .form-group label {
@@ -305,9 +338,12 @@
         /* Metrics KPI Bar */
         .kpi-grid {
             display: grid;
-            grid-template-columns: repeat(4, 1fr);
+            grid-template-columns: repeat(4, minmax(0, 1fr));
             gap: 14px;
             margin-bottom: 24px;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
         }
 
         .kpi-card {
@@ -318,36 +354,58 @@
             display: flex;
             flex-direction: column;
             justify-content: center;
+            min-width: 0;
+            max-width: 100%;
+            overflow: hidden;
+            box-sizing: border-box;
         }
 
         .kpi-title {
             font-size: 0.75rem;
             text-transform: uppercase;
-            letter-spacing: 0.05em;
+            letter-spacing: 0.04em;
             color: var(--text-muted);
             font-weight: 600;
             margin-bottom: 4px;
+            word-break: break-word;
+            overflow-wrap: break-word;
+            hyphens: auto;
+            line-height: 1.25;
         }
 
         .kpi-value {
             font-size: clamp(1.15rem, 2.5vw, 1.45rem);
             font-weight: 700;
             color: #fff;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         .kpi-sub {
             font-size: 0.75rem;
             color: var(--text-muted);
             margin-top: 4px;
+            word-break: break-word;
+            overflow-wrap: break-word;
         }
 
         /* Chart Area */
         .chart-container {
             position: relative;
             height: 360px;
-            min-height: 260px;
+            min-height: 240px;
             width: 100%;
+            max-width: 100%;
+            min-width: 0;
+            overflow: hidden;
             margin-bottom: 24px;
+        }
+
+        .chart-container canvas {
+            max-width: 100% !important;
+            width: 100% !important;
+            height: 100% !important;
         }
 
         /* Notice banner */
@@ -413,11 +471,14 @@
             border: 1px solid var(--panel-border);
             border-radius: 8px;
             -webkit-overflow-scrolling: touch;
+            width: 100%;
+            max-width: 100%;
+            min-width: 0;
         }
 
         table {
             width: 100%;
-            min-width: 600px;
+            min-width: 520px;
             border-collapse: collapse;
             font-size: 0.85rem;
             text-align: left;
@@ -484,17 +545,18 @@
         /* Responsive Media Queries */
         @media (max-width: 1024px) {
             .layout-grid {
-                grid-template-columns: 1fr;
+                grid-template-columns: minmax(0, 1fr);
+                gap: 16px;
             }
         }
 
         @media (max-width: 768px) {
             body {
-                padding: 12px;
-                padding-top: max(12px, env(safe-area-inset-top));
-                padding-bottom: max(12px, env(safe-area-inset-bottom));
-                padding-left: max(12px, env(safe-area-inset-left));
-                padding-right: max(12px, env(safe-area-inset-right));
+                padding: 10px;
+                padding-top: max(10px, env(safe-area-inset-top));
+                padding-bottom: max(10px, env(safe-area-inset-bottom));
+                padding-left: max(10px, env(safe-area-inset-left));
+                padding-right: max(10px, env(safe-area-inset-right));
             }
 
             header {
@@ -502,24 +564,32 @@
                 align-items: flex-start;
                 gap: 12px;
                 margin-bottom: 16px;
+                width: 100%;
+                max-width: 100%;
             }
 
             header h1 {
                 font-size: 1.35rem;
+                word-break: break-word;
             }
 
             .header-badges {
                 width: 100%;
-                justify-content: space-between;
+                display: flex;
+                flex-wrap: wrap;
+                gap: 8px;
             }
 
             .presets-bar {
+                display: flex;
                 flex-wrap: nowrap;
                 overflow-x: auto;
                 padding-bottom: 8px;
                 margin-bottom: 16px;
                 -webkit-overflow-scrolling: touch;
                 scrollbar-width: none;
+                width: 100%;
+                max-width: 100%;
             }
 
             .presets-bar::-webkit-scrollbar {
@@ -533,53 +603,82 @@
             }
 
             .panel {
-                padding: 16px;
+                padding: 14px;
                 border-radius: 12px;
             }
 
+            /* Single-column inputs on mobile for effortless touch and no horizontal squeeze */
+            .form-row {
+                grid-template-columns: 1fr;
+                gap: 0;
+            }
+
             .kpi-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 10px;
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+                gap: 8px;
                 margin-bottom: 16px;
             }
 
             .kpi-card {
-                padding: 12px;
+                padding: 10px;
+            }
+
+            .kpi-title {
+                font-size: 0.68rem;
+                letter-spacing: 0.02em;
+                line-height: 1.25;
             }
 
             .kpi-value {
-                font-size: 1.25rem;
+                font-size: clamp(1.1rem, 3.5vw, 1.3rem);
+            }
+
+            .kpi-sub {
+                font-size: 0.7rem;
             }
 
             .chart-container {
-                height: 270px;
+                height: 250px;
                 margin-bottom: 16px;
             }
 
             .table-hint {
                 display: inline-block;
             }
+
+            .table-header {
+                margin-bottom: 10px;
+            }
         }
 
         @media (max-width: 480px) {
-            header h1 {
-                font-size: 1.25rem;
+            body {
+                padding: 8px;
+                padding-top: max(8px, env(safe-area-inset-top));
+                padding-bottom: max(8px, env(safe-area-inset-bottom));
+                padding-left: max(8px, env(safe-area-inset-left));
+                padding-right: max(8px, env(safe-area-inset-right));
             }
 
-            .form-row {
-                grid-template-columns: 1fr;
-                gap: 0;
+            header h1 {
+                font-size: 1.2rem;
             }
 
             .header-badges {
                 flex-direction: column;
-                align-items: flex-start;
-                gap: 8px;
+                align-items: stretch;
+                gap: 6px;
             }
 
             .engine-pill, .brand-badge {
                 font-size: 0.78rem;
-                padding: 5px 12px;
+                padding: 6px 12px;
+                justify-content: center;
+                text-align: center;
+            }
+
+            .panel {
+                padding: 12px;
             }
 
             footer {
