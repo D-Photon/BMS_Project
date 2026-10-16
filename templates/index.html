@@ -2,13 +2,21 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Domestic Solar & Battery DoD Simulator v2.0</title>
-    <!-- Google Fonts & Chart.js CDN -->
+    <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
+    <!-- Chart.js with Primary & Backup CDN Fallback -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+    <script>
+        if (typeof Chart === 'undefined') {
+            document.write('<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"><\/script>');
+        }
+    </script>
+
     <style>
         :root {
             --bg-main: #0b0f19;
@@ -29,10 +37,16 @@
 
         * {
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        html, body {
+            overflow-x: hidden;
+            width: 100%;
         }
 
         body {
-            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--bg-main);
             background-image: 
                 radial-gradient(at 0% 0%, rgba(59, 130, 246, 0.12) 0px, transparent 50%),
@@ -40,10 +54,13 @@
             color: var(--text-main);
             margin: 0;
             padding: 24px;
+            padding-top: max(24px, env(safe-area-inset-top));
+            padding-bottom: max(24px, env(safe-area-inset-bottom));
+            padding-left: max(24px, env(safe-area-inset-left));
+            padding-right: max(24px, env(safe-area-inset-right));
             min-height: 100vh;
             display: flex;
             flex-direction: column;
-            -webkit-tap-highlight-color: transparent;
         }
 
         .dashboard-container {
@@ -60,6 +77,8 @@
             align-items: center;
             padding-bottom: 16px;
             border-bottom: 1px solid var(--panel-border);
+            flex-wrap: wrap;
+            gap: 12px;
         }
 
         header h1 {
@@ -78,6 +97,13 @@
             font-size: 0.9rem;
         }
 
+        .header-badges {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+
         .brand-badge {
             background: rgba(59, 130, 246, 0.15);
             color: #60a5fa;
@@ -91,7 +117,21 @@
             gap: 8px;
         }
 
-        /* Preset Quick Buttons */
+        .engine-pill {
+            background: rgba(16, 185, 129, 0.15);
+            color: #34d399;
+            padding: 6px 14px;
+            border-radius: 9999px;
+            font-size: 0.8rem;
+            font-weight: 600;
+            border: 1px solid rgba(52, 211, 153, 0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.3s ease;
+        }
+
+        /* Preset Quick Buttons - Scrollable on mobile */
         .presets-bar {
             display: flex;
             gap: 10px;
@@ -110,21 +150,24 @@
             background: rgba(255, 255, 255, 0.05);
             border: 1px solid var(--panel-border);
             color: var(--text-main);
-            padding: 8px 14px;
-            border-radius: 6px;
+            padding: 10px 16px;
+            border-radius: 8px;
             font-size: 0.85rem;
             font-weight: 500;
             cursor: pointer;
             transition: all 0.2s ease;
-            min-height: 38px;
+            min-height: 42px;
             display: inline-flex;
             align-items: center;
+            user-select: none;
+            -webkit-user-select: none;
         }
 
         .btn-preset:hover, .btn-preset:active {
             background: rgba(59, 130, 246, 0.2);
             border-color: var(--primary);
             color: #fff;
+            transform: translateY(-1px);
         }
 
         /* Layout Grid */
@@ -137,6 +180,7 @@
         .panel {
             background: var(--panel-bg);
             backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border-radius: 16px;
             padding: 24px;
             box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.37);
@@ -175,15 +219,25 @@
 
         .form-group input, .form-group select {
             width: 100%;
-            padding: 10px 12px;
+            padding: 12px 14px;
             background: var(--input-bg);
             border: 1px solid var(--input-border);
             border-radius: 8px;
             color: var(--text-main);
-            font-size: 0.95rem;
+            font-size: 16px; /* Crucial: 16px prevents iOS Safari from auto-zooming */
             font-family: inherit;
             transition: all 0.2s ease;
-            min-height: 42px;
+            min-height: 46px;
+            -webkit-appearance: none;
+            appearance: none;
+        }
+
+        .form-group select {
+            background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2394a3b8' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right 12px center;
+            background-size: 16px;
+            padding-right: 36px;
         }
 
         .form-group input:disabled {
@@ -199,10 +253,11 @@
 
         .toggle-box {
             background: rgba(255, 255, 255, 0.03);
-            padding: 12px 14px;
+            padding: 14px 16px;
             border-radius: 8px;
             border: 1px solid var(--panel-border);
             margin-bottom: 16px;
+            user-select: none;
         }
 
         .toggle-box label {
@@ -213,12 +268,12 @@
             margin: 0;
             color: #fff;
             font-weight: 600;
-            font-size: 0.85rem;
+            font-size: 0.9rem;
         }
 
         .toggle-box input[type="checkbox"] {
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
             accent-color: var(--primary);
             cursor: pointer;
         }
@@ -236,6 +291,10 @@
             transition: all 0.2s ease;
             box-shadow: 0 4px 14px 0 rgba(37, 99, 235, 0.39);
             min-height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
         }
 
         button.btn-submit:hover, button.btn-submit:active {
@@ -256,6 +315,9 @@
             padding: 16px;
             border-radius: 12px;
             border: 1px solid var(--panel-border);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
         }
 
         .kpi-title {
@@ -268,7 +330,7 @@
         }
 
         .kpi-value {
-            font-size: clamp(1.1rem, 2.5vw, 1.4rem);
+            font-size: clamp(1.15rem, 2.5vw, 1.45rem);
             font-weight: 700;
             color: #fff;
         }
@@ -283,8 +345,25 @@
         .chart-container {
             position: relative;
             height: 360px;
+            min-height: 260px;
             width: 100%;
             margin-bottom: 24px;
+        }
+
+        /* Notice banner */
+        .status-alert {
+            display: none;
+            padding: 10px 14px;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            font-size: 0.85rem;
+            border: 1px solid transparent;
+        }
+        .status-alert.info {
+            display: block;
+            background: rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.3);
+            color: #93c5fd;
         }
 
         /* Table Area */
@@ -293,11 +372,19 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 14px;
+            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .table-title {
             font-size: 1rem;
             font-weight: 600;
+        }
+
+        .table-hint {
+            display: none;
+            font-size: 0.75rem;
+            color: var(--text-muted);
         }
 
         .btn-export {
@@ -306,10 +393,13 @@
             color: var(--text-main);
             padding: 8px 14px;
             border-radius: 6px;
-            font-size: 0.8rem;
+            font-size: 0.85rem;
             cursor: pointer;
             transition: all 0.2s ease;
-            min-height: 36px;
+            min-height: 38px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
 
         .btn-export:hover, .btn-export:active {
@@ -341,6 +431,7 @@
             position: sticky;
             top: 0;
             border-bottom: 1px solid var(--panel-border);
+            z-index: 1;
         }
 
         td {
@@ -354,11 +445,12 @@
         }
 
         .badge-status {
-            padding: 3px 8px;
+            padding: 4px 10px;
             border-radius: 9999px;
             font-size: 0.75rem;
             font-weight: 600;
             display: inline-block;
+            white-space: nowrap;
         }
 
         .badge-charging { background: rgba(16, 185, 129, 0.2); color: #34d399; }
@@ -399,20 +491,45 @@
         @media (max-width: 768px) {
             body {
                 padding: 12px;
+                padding-top: max(12px, env(safe-area-inset-top));
+                padding-bottom: max(12px, env(safe-area-inset-bottom));
+                padding-left: max(12px, env(safe-area-inset-left));
+                padding-right: max(12px, env(safe-area-inset-right));
             }
 
             header {
                 flex-direction: column;
                 align-items: flex-start;
                 gap: 12px;
+                margin-bottom: 16px;
             }
 
             header h1 {
-                font-size: 1.4rem;
+                font-size: 1.35rem;
             }
 
-            .brand-badge {
-                align-self: flex-start;
+            .header-badges {
+                width: 100%;
+                justify-content: space-between;
+            }
+
+            .presets-bar {
+                flex-wrap: nowrap;
+                overflow-x: auto;
+                padding-bottom: 8px;
+                margin-bottom: 16px;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+            }
+
+            .presets-bar::-webkit-scrollbar {
+                display: none;
+            }
+
+            .btn-preset {
+                flex: 0 0 auto;
+                font-size: 0.8rem;
+                padding: 8px 12px;
             }
 
             .panel {
@@ -423,24 +540,30 @@
             .kpi-grid {
                 grid-template-columns: repeat(2, 1fr);
                 gap: 10px;
+                margin-bottom: 16px;
             }
 
             .kpi-card {
                 padding: 12px;
             }
 
-            .chart-container {
-                height: 280px;
+            .kpi-value {
+                font-size: 1.25rem;
             }
 
-            .form-group input, .form-group select {
-                font-size: 16px; /* Prevents auto-zoom on iOS */
+            .chart-container {
+                height: 270px;
+                margin-bottom: 16px;
+            }
+
+            .table-hint {
+                display: inline-block;
             }
         }
 
         @media (max-width: 480px) {
-            .kpi-grid {
-                grid-template-columns: 1fr;
+            header h1 {
+                font-size: 1.25rem;
             }
 
             .form-row {
@@ -448,21 +571,28 @@
                 gap: 0;
             }
 
-            .presets-bar {
-                overflow-x: auto;
-                padding-bottom: 6px;
-                white-space: nowrap;
-                -webkit-overflow-scrolling: touch;
+            .header-badges {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 8px;
             }
 
-            .btn-preset {
-                flex: 0 0 auto;
+            .engine-pill, .brand-badge {
+                font-size: 0.78rem;
+                padding: 5px 12px;
             }
 
             footer {
                 flex-direction: column;
                 align-items: center;
                 text-align: center;
+                gap: 6px;
+            }
+        }
+
+        @media (max-width: 360px) {
+            .kpi-grid {
+                grid-template-columns: 1fr;
             }
         }
     </style>
@@ -475,17 +605,18 @@
             <h1>Domestic Battery Management System</h1>
             <p>Real-time Battery Depth-of-Discharge (DoD) &amp; Energy Engine v2.0</p>
         </div>
-        <div class="brand-badge">
-            ⚡ Photon Power Engine
+        <div class="header-badges">
+            <div id="engineBadge" class="engine-pill">⚡ Local Engine Ready</div>
+            <div class="brand-badge">⚡ Photon Power Engine</div>
         </div>
     </header>
 
     <!-- Quick Presets -->
     <div class="presets-bar">
-        <span class="preset-label">Quick Presets:</span>
-        <button class="btn-preset" onclick="loadPreset('night_discharge')">🌙 Night Discharge / Pure DoD Mode</button>
-        <button class="btn-preset" onclick="loadPreset('home_5kwh')">🔋 5kWh LiFePO4 (Solar Enabled)</button>
-        <button class="btn-preset" onclick="loadPreset('cabin_offgrid')">🏡 3.5kWh Off-Grid (Solar Enabled)</button>
+        <span class="preset-label">Presets:</span>
+        <button class="btn-preset" onclick="loadPreset('night_discharge')">🌙 Night DoD Mode</button>
+        <button class="btn-preset" onclick="loadPreset('home_5kwh')">🔋 5kWh LiFePO4</button>
+        <button class="btn-preset" onclick="loadPreset('cabin_offgrid')">🏡 3.5kWh Cabin</button>
     </div>
 
     <div class="layout-grid">
@@ -505,22 +636,22 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="voltage">Voltage (V)</label>
-                        <input type="number" id="voltage" value="48" step="0.1" required>
+                        <input type="number" id="voltage" value="48" step="0.1" inputmode="decimal" required>
                     </div>
                     <div class="form-group">
                         <label for="capacity">Capacity (Ah)</label>
-                        <input type="number" id="capacity" value="200" step="0.1" required>
+                        <input type="number" id="capacity" value="200" step="0.1" inputmode="decimal" required>
                     </div>
                 </div>
 
                 <div class="form-row">
                     <div class="form-group">
                         <label for="loadWatts">Load Power (W)</label>
-                        <input type="number" id="loadWatts" value="600" step="10" required>
+                        <input type="number" id="loadWatts" value="600" step="10" inputmode="numeric" required>
                     </div>
                     <div class="form-group">
                         <label for="solarPeak" id="solarPeakLabel">Solar PV Peak (kW)</label>
-                        <input type="number" id="solarPeak" value="1.5" step="0.1" min="0" disabled required>
+                        <input type="number" id="solarPeak" value="1.5" step="0.1" min="0" inputmode="decimal" disabled required>
                     </div>
                 </div>
 
@@ -536,25 +667,29 @@
                 <div class="form-row">
                     <div class="form-group">
                         <label for="maxDoD">Max DoD (%)</label>
-                        <input type="number" id="maxDoD" value="80" min="10" max="100" required>
+                        <input type="number" id="maxDoD" value="80" min="10" max="100" inputmode="numeric" required>
                     </div>
                     <div class="form-group">
                         <label for="inverterEff">Inverter Eff. (%)</label>
-                        <input type="number" id="inverterEff" value="92" min="50" max="100" required>
+                        <input type="number" id="inverterEff" value="92" min="50" max="100" inputmode="numeric" required>
                     </div>
                 </div>
 
                 <div class="form-group">
                     <label for="hours">Simulation Hours</label>
-                    <input type="number" id="hours" value="24" min="1" max="72" required>
+                    <input type="number" id="hours" value="24" min="1" max="72" inputmode="numeric" required>
                 </div>
 
-                <button type="submit" class="btn-submit">Run Engine Simulation</button>
+                <button type="submit" id="btnSubmit" class="btn-submit">
+                    <span>Run Engine Simulation</span>
+                </button>
             </form>
         </div>
 
         <!-- Main Chart & KPI Panel -->
         <div class="panel">
+            <div id="statusAlert" class="status-alert"></div>
+
             <div class="kpi-grid">
                 <div class="kpi-card">
                     <div class="kpi-title">Max System Storage</div>
@@ -584,7 +719,10 @@
 
             <!-- Telemetry Table -->
             <div class="table-header">
-                <div class="table-title">Hourly Telemetry Breakdown</div>
+                <div>
+                    <span class="table-title">Hourly Telemetry Breakdown</span>
+                    <span class="table-hint">(Swipe horizontally &rarr;)</span>
+                </div>
                 <button class="btn-export" onclick="exportCSV()">📥 Export CSV</button>
             </div>
             <div class="table-wrapper">
@@ -650,7 +788,7 @@
         document.getElementById('inverterEff').value = p.inverterEff;
         document.getElementById('hours').value = p.hours;
         
-        document.getElementById('bmsForm').dispatchEvent(new Event('submit'));
+        executeSimulation();
     }
 
     function updateDoDDefault() {
@@ -666,46 +804,220 @@
         if (window.BMS_API_URL) {
             return window.BMS_API_URL.replace(/\/$/, '') + '/api/v1/simulate';
         }
+        // If opened as local file, do not attempt relative fetch to file:///
+        if (window.location.protocol === 'file:') {
+            return null;
+        }
         return '/api/v1/simulate';
+    }
+
+    // Pure JavaScript Simulation Engine - Identical to backend app/simulator.py
+    // Guarantees instant 0ms calculation even offline or when backend API is unavailable
+    function runSimulationClientSide(data) {
+        const maxCapacityWh = data.capacity_ah * data.voltage;
+        const maxCapacityKwh = maxCapacityWh / 1000.0;
+        const maxDod = data.max_dod_percent / 100.0;
+        const minReserveSoc = Math.max(0.0, 100.0 - (maxDod * 100.0));
+        const usableCapacityKwh = maxCapacityKwh * maxDod;
+        const inverterEff = data.inverter_efficiency / 100.0;
+
+        let currentSoc = 100.0;
+        let currentEnergyWh = maxCapacityWh;
+        const timeline = [];
+        let cumulativeDeliveredWh = 0.0;
+        let totalSolarGenWh = 0.0;
+        let totalRequestedLoadWh = 0.0;
+        let autonomySteps = 0;
+        let cutoffReached = false;
+
+        function solarIrradianceFactor(hour) {
+            const hourOfDay = (hour - 1) % 24;
+            if (hourOfDay >= 6 && hourOfDay <= 18) {
+                const angle = (hourOfDay - 6) * Math.PI / 12.0;
+                return Math.max(0.0, Math.sin(angle));
+            }
+            return 0.0;
+        }
+
+        for (let hour = 1; hour <= data.usage_hours; hour++) {
+            const hourOfDay = (hour - 1) % 24;
+            const timeLabel = String(hourOfDay).padStart(2, '0') + ":00";
+
+            let hourlySolarWh = 0.0;
+            if (data.enable_solar) {
+                const factor = solarIrradianceFactor(hour);
+                hourlySolarWh = data.solar_peak_kw * 1000.0 * factor;
+            }
+            totalSolarGenWh += hourlySolarWh;
+
+            const hourlyLoadGrossWh = (data.load_watts * 1.0) / inverterEff;
+            totalRequestedLoadWh += data.load_watts * 1.0;
+
+            const netWh = hourlySolarWh - hourlyLoadGrossWh;
+            let deliveredLoadWh = 0.0;
+            let status = "Active";
+            let statusCode = "discharging";
+
+            if (netWh >= 0) {
+                deliveredLoadWh = data.load_watts * 1.0;
+                const chargeEnergy = netWh * 0.95; // 95% charging efficiency
+                currentEnergyWh = Math.min(maxCapacityWh, currentEnergyWh + chargeEnergy);
+                currentSoc = (currentEnergyWh / maxCapacityWh) * 100.0;
+
+                if (currentSoc >= 99.9) {
+                    status = "Full (Solar Float)";
+                    statusCode = "charging";
+                } else {
+                    status = "Charging (+" + (chargeEnergy / 1000.0).toFixed(2) + " kW solar)";
+                    statusCode = "charging";
+                }
+                if (!cutoffReached) {
+                    autonomySteps++;
+                }
+            } else {
+                const deficitWh = Math.abs(netWh);
+                const solarToLoadWh = hourlySolarWh * inverterEff;
+                const minReserveWh = maxCapacityWh * (minReserveSoc / 100.0);
+                const availableBatteryWh = Math.max(0.0, currentEnergyWh - minReserveWh);
+
+                if (availableBatteryWh >= deficitWh) {
+                    currentEnergyWh -= deficitWh;
+                    currentSoc = (currentEnergyWh / maxCapacityWh) * 100.0;
+                    deliveredLoadWh = data.load_watts * 1.0;
+
+                    if (currentSoc <= minReserveSoc + 5.0) {
+                        status = "Warning: Low SoC Reserve!";
+                        statusCode = "warning";
+                    } else {
+                        status = "Active Discharging";
+                        statusCode = "discharging";
+                    }
+                    if (!cutoffReached) {
+                        autonomySteps++;
+                    }
+                } else {
+                    cutoffReached = true;
+                    const batterySuppliedWh = availableBatteryWh;
+                    currentEnergyWh = minReserveWh;
+                    currentSoc = minReserveSoc;
+                    deliveredLoadWh = solarToLoadWh + (batterySuppliedWh * inverterEff);
+
+                    if (deliveredLoadWh > 0.1) {
+                        status = "Partial Power (" + Math.round(deliveredLoadWh) + "W delivered)";
+                        statusCode = "warning";
+                    } else {
+                        status = "Inactive: Battery Cutoff!";
+                        statusCode = "cutoff";
+                    }
+                }
+            }
+
+            cumulativeDeliveredWh += deliveredLoadWh;
+            const remainingKwh = (currentSoc / 100.0) * maxCapacityKwh;
+            const netPowerKw = (hourlySolarWh - (data.load_watts * 1.0)) / 1000.0;
+
+            timeline.push({
+                hour: hour,
+                time_label: timeLabel,
+                soc_percent: parseFloat(currentSoc.toFixed(1)),
+                solar_gen_kwh: parseFloat((hourlySolarWh / 1000.0).toFixed(3)),
+                load_kwh: parseFloat((data.load_watts / 1000.0).toFixed(3)),
+                net_power_kw: parseFloat(netPowerKw.toFixed(3)),
+                energy_used_kwh: parseFloat((cumulativeDeliveredWh / 1000.0).toFixed(3)),
+                remaining_kwh: parseFloat(remainingKwh.toFixed(3)),
+                status: status,
+                status_code: statusCode
+            });
+        }
+
+        const totalLoadDeliveredKwh = cumulativeDeliveredWh / 1000.0;
+        const totalRequestedKwh = totalRequestedLoadWh / 1000.0;
+        const unmetDemandKwh = Math.max(0.0, totalRequestedKwh - totalLoadDeliveredKwh);
+        const solarGenKwh = totalSolarGenWh / 1000.0;
+        let solarSufficiency = (Math.min(solarGenKwh, totalLoadDeliveredKwh) / Math.max(0.001, totalLoadDeliveredKwh)) * 100.0;
+        solarSufficiency = Math.min(100.0, solarSufficiency);
+
+        return {
+            system_voltage: data.voltage,
+            total_capacity_kwh: parseFloat(maxCapacityKwh.toFixed(2)),
+            usable_capacity_kwh: parseFloat(usableCapacityKwh.toFixed(2)),
+            autonomy_hours: autonomySteps,
+            solar_self_sufficiency_percent: parseFloat(solarSufficiency.toFixed(1)),
+            total_solar_gen_kwh: parseFloat(solarGenKwh.toFixed(2)),
+            total_load_delivered_kwh: parseFloat(totalLoadDeliveredKwh.toFixed(2)),
+            unmet_demand_kwh: parseFloat(unmetDemandKwh.toFixed(2)),
+            timeline: timeline
+        };
+    }
+
+    function getFormData() {
+        return {
+            voltage: parseFloat(document.getElementById('voltage').value) || 48.0,
+            capacity_ah: parseFloat(document.getElementById('capacity').value) || 200.0,
+            load_watts: parseFloat(document.getElementById('loadWatts').value) || 600.0,
+            solar_peak_kw: parseFloat(document.getElementById('solarPeak').value) || 0.0,
+            enable_solar: document.getElementById('enableSolar').checked,
+            battery_type: document.getElementById('batteryType').value,
+            max_dod_percent: parseFloat(document.getElementById('maxDoD').value) || 80.0,
+            inverter_efficiency: parseFloat(document.getElementById('inverterEff').value) || 92.0,
+            usage_hours: parseInt(document.getElementById('hours').value) || 24
+        };
+    }
+
+    function setEngineStatus(text, color, borderColor, bg) {
+        const badge = document.getElementById('engineBadge');
+        if (!badge) return;
+        badge.innerText = text;
+        badge.style.color = color;
+        badge.style.borderColor = borderColor;
+        badge.style.background = bg;
+    }
+
+    function executeSimulation() {
+        const requestData = getFormData();
+        const isSolarEnabled = requestData.enable_solar;
+
+        // 1. INSTANT LOCAL SIMULATION (Guarantees graph & KPIs ALWAYS display immediately)
+        const localResult = runSimulationClientSide(requestData);
+        currentSimulationData = localResult;
+        updateKPIs(localResult, isSolarEnabled);
+        renderChart(localResult.timeline, isSolarEnabled);
+        renderTable(localResult.timeline);
+        setEngineStatus("⚡ Local Engine Active", "#34d399", "rgba(52, 211, 153, 0.3)", "rgba(16, 185, 129, 0.15)");
+
+        // 2. OPTIONAL BACKEND API SYNC (if endpoint is available)
+        const apiEndpoint = getApiEndpoint();
+        if (apiEndpoint) {
+            fetch(apiEndpoint, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(requestData)
+            })
+            .then(function (response) {
+                if (response.ok) {
+                    return response.json();
+                }
+                throw new Error("API returned status " + response.status);
+            })
+            .then(function (data) {
+                // If cloud API returns successfully, sync data
+                currentSimulationData = data;
+                updateKPIs(data, isSolarEnabled);
+                renderChart(data.timeline, isSolarEnabled);
+                renderTable(data.timeline);
+                setEngineStatus("☁️ Cloud API Synced", "#60a5fa", "rgba(96, 165, 250, 0.3)", "rgba(59, 130, 246, 0.15)");
+            })
+            .catch(function (err) {
+                // Backend is asleep or offline - smoothly remain on local engine without error
+                console.log("Using instant local simulation engine:", err.message);
+                setEngineStatus("⚡ Local Engine (Offline-Ready)", "#34d399", "rgba(52, 211, 153, 0.3)", "rgba(16, 185, 129, 0.15)");
+            });
+        }
     }
 
     document.getElementById('bmsForm').addEventListener('submit', function (e) {
         e.preventDefault();
-
-        const isSolarEnabled = document.getElementById('enableSolar').checked;
-
-        const requestData = {
-            voltage: parseFloat(document.getElementById('voltage').value),
-            capacity_ah: parseFloat(document.getElementById('capacity').value),
-            load_watts: parseFloat(document.getElementById('loadWatts').value),
-            solar_peak_kw: parseFloat(document.getElementById('solarPeak').value),
-            enable_solar: isSolarEnabled,
-            battery_type: document.getElementById('batteryType').value,
-            max_dod_percent: parseFloat(document.getElementById('maxDoD').value),
-            inverter_efficiency: parseFloat(document.getElementById('inverterEff').value),
-            usage_hours: parseInt(document.getElementById('hours').value)
-        };
-
-        fetch(getApiEndpoint(), {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify(requestData)
-        })
-        .then(function (response) {
-            if (!response.ok) {
-                throw new Error("Simulation engine error");
-            }
-            return response.json();
-        })
-        .then(function (data) {
-            currentSimulationData = data;
-            updateKPIs(data, isSolarEnabled);
-            renderChart(data.timeline, isSolarEnabled);
-            renderTable(data.timeline);
-        })
-        .catch(function (err) {
-            console.error("Failed to connect to BMS API:", err);
-        });
+        executeSimulation();
     });
 
     function updateKPIs(data, isSolarEnabled) {
@@ -715,7 +1027,9 @@
         document.getElementById('kpiAutonomy').innerText = data.autonomy_hours + " Hours";
         
         const lastStep = data.timeline[data.timeline.length - 1];
-        document.getElementById('kpiCutoffStatus').innerText = "End SoC: " + lastStep.soc_percent + "%";
+        if (lastStep) {
+            document.getElementById('kpiCutoffStatus').innerText = "End SoC: " + lastStep.soc_percent + "%";
+        }
 
         const solarTitle = document.getElementById('kpiSolarTitle');
         const solarSuff = document.getElementById('kpiSolarSufficiency');
@@ -724,6 +1038,7 @@
         if (isSolarEnabled) {
             solarTitle.innerText = "Solar Self-Sufficiency";
             solarSuff.innerText = data.solar_self_sufficiency_percent + "%";
+            solarSuff.style.color = "var(--solar-amber)";
             solarSub.innerText = "Total Gen: " + data.total_solar_gen_kwh + " kWh";
         } else {
             solarTitle.innerText = "Solar PV Charging";
@@ -739,18 +1054,31 @@
     }
 
     function renderChart(timeline, isSolarEnabled) {
-        const labels = timeline.map(function (item) { return item.time_label + " (H" + item.hour + ")"; });
+        if (typeof Chart === 'undefined') {
+            console.warn("Chart.js is still loading, retrying in 100ms...");
+            setTimeout(function() { renderChart(timeline, isSolarEnabled); }, 100);
+            return;
+        }
+
+        const isMobile = window.innerWidth < 768;
+        const labels = timeline.map(function (item) { 
+            return isMobile ? item.time_label : item.time_label + " (H" + item.hour + ")"; 
+        });
         const socData = timeline.map(function (item) { return item.soc_percent; });
         const solarData = timeline.map(function (item) { return item.solar_gen_kwh; });
         const loadData = timeline.map(function (item) { return item.load_kwh; });
 
-        const ctx = document.getElementById('bmsChart').getContext('2d');
+        const canvas = document.getElementById('bmsChart');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        if (!ctx) return;
 
         if (bmsChart) {
             bmsChart.destroy();
+            bmsChart = null;
         }
 
-        const gradientSoC = ctx.createLinearGradient(0, 0, 0, 300);
+        const gradientSoC = ctx.createLinearGradient(0, 0, 0, isMobile ? 220 : 300);
         gradientSoC.addColorStop(0, 'rgba(59, 130, 246, 0.4)');
         gradientSoC.addColorStop(1, 'rgba(59, 130, 246, 0.0)');
 
@@ -760,29 +1088,31 @@
                 data: socData,
                 borderColor: '#3b82f6',
                 backgroundColor: gradientSoC,
-                borderWidth: 3,
+                borderWidth: isMobile ? 2.5 : 3,
                 fill: true,
                 tension: 0.3,
+                pointRadius: isMobile ? 1.5 : 3,
                 yAxisID: 'ySoC'
             },
             {
-                label: 'Load Demand (kWh)',
+                label: 'Load (kWh)',
                 data: loadData,
                 borderColor: '#ef4444',
                 borderWidth: 2,
                 borderDash: [5, 5],
                 fill: false,
+                pointRadius: isMobile ? 0 : 2,
                 yAxisID: 'yPower'
             }
         ];
 
         if (isSolarEnabled) {
             datasets.splice(1, 0, {
-                label: 'Solar PV Gen (kWh)',
+                label: 'Solar (kWh)',
                 data: solarData,
                 borderColor: '#f59e0b',
                 backgroundColor: 'rgba(245, 158, 11, 0.6)',
-                borderWidth: 2,
+                borderWidth: 1.5,
                 type: 'bar',
                 yAxisID: 'yPower'
             });
@@ -797,35 +1127,67 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
+                resizeDelay: 50,
                 interaction: {
                     mode: 'index',
                     intersect: false
                 },
                 plugins: {
                     legend: {
-                        labels: { color: '#94a3b8', font: { family: 'Inter' } }
+                        position: isMobile ? 'bottom' : 'top',
+                        labels: { 
+                            color: '#94a3b8', 
+                            boxWidth: isMobile ? 10 : 14,
+                            padding: isMobile ? 8 : 12,
+                            font: { family: 'Inter', size: isMobile ? 11 : 12 } 
+                        }
+                    },
+                    tooltip: {
+                        padding: isMobile ? 8 : 12,
+                        titleFont: { size: isMobile ? 11 : 13 },
+                        bodyFont: { size: isMobile ? 11 : 12 }
                     }
                 },
                 scales: {
                     x: {
                         grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                        ticks: { color: '#94a3b8' }
+                        ticks: { 
+                            color: '#94a3b8',
+                            autoSkip: true,
+                            maxTicksLimit: isMobile ? 6 : 12,
+                            font: { size: isMobile ? 10 : 11 }
+                        }
                     },
                     ySoC: {
                         type: 'linear',
                         position: 'left',
                         min: 0,
                         max: 100,
-                        title: { display: true, text: 'State of Charge (%)', color: '#60a5fa' },
+                        title: { 
+                            display: !isMobile, 
+                            text: 'State of Charge (%)', 
+                            color: '#60a5fa' 
+                        },
                         grid: { color: 'rgba(255, 255, 255, 0.05)' },
-                        ticks: { color: '#94a3b8', callback: function (v) { return v + '%'; } }
+                        ticks: { 
+                            color: '#94a3b8', 
+                            callback: function (v) { return v + '%'; },
+                            font: { size: isMobile ? 10 : 11 }
+                        }
                     },
                     yPower: {
                         type: 'linear',
                         position: 'right',
-                        title: { display: true, text: 'Energy (kWh)', color: '#ef4444' },
+                        title: { 
+                            display: !isMobile, 
+                            text: 'Energy (kWh)', 
+                            color: '#ef4444' 
+                        },
                         grid: { drawOnChartArea: false },
-                        ticks: { color: '#94a3b8' }
+                        ticks: { 
+                            color: '#94a3b8',
+                            font: { size: isMobile ? 10 : 11 }
+                        }
                     }
                 }
             }
@@ -834,6 +1196,7 @@
 
     function renderTable(timeline) {
         const tbody = document.getElementById('telemetryTableBody');
+        if (!tbody) return;
         tbody.innerHTML = '';
 
         timeline.forEach(function (row) {
@@ -876,8 +1239,15 @@
         document.body.removeChild(a);
     }
 
-    // Auto-run initial simulation on load
-    document.getElementById('bmsForm').dispatchEvent(new Event('submit'));
+    // Auto-run instant simulation on page load
+    window.addEventListener('DOMContentLoaded', function () {
+        executeSimulation();
+    });
+
+    // Fallback trigger in case DOMContentLoaded already fired
+    if (document.readyState === 'complete' || document.readyState === 'interactive') {
+        executeSimulation();
+    }
 </script>
 
 </body>
